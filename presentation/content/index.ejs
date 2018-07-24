@@ -182,7 +182,9 @@ import { call, put, select } from 'redux-saga/effects'
 
 function* fetchProducts() {
   const state = yield select()
-  const products = yield call(Api.fetch, '/products', state.session.token)
+  const products = yield call(
+    Api.fetch, '/products', state.session.token
+  )
   yield put({ type: 'PRODUCTS_RECEIVED', products })
 }
     </code></pre>
@@ -198,7 +200,7 @@ import { call, put, select } from 'redux-saga/effects'
 
 function* fetchProducts() {
   try {
-    const products = yield call(Api.fetch, '/products', state.session.token)
+    const products = yield call(Api.fetch, '/products')
     yield put({ type: 'PRODUCTS_RECEIVED', products })
   } catch (e) {
     yield put({ type: 'PRODUCTS_ERROR', e })
@@ -216,7 +218,6 @@ function* fetchAll() {
   const task2 = yield fork(fetchResource, 'comments')
   yield call(delay, 1000)
 }
-
 function* fetchResource(resource) {
   const { data } = yield call(api.fetch, resource)
   yield put(...)
@@ -249,20 +250,14 @@ function* fetchAll() {
   yield call(delay, 1000)
   yield cancel(task1)
 }
-
 function* fetchResource(resource) {
   const { data } = yield call(api.fetch, resource)
   if (!(yield cancelled())) {
     yield put(...)
   }
 }
-
 function* main() {
-  try {
-    yield call(fetchAll)
-  } catch (e) {
-    // handle fetchAll errors
-  }
+  yield call(fetchAll)
 }
     </code></pre>
   </section>
@@ -272,7 +267,6 @@ function* main() {
 
     <pre><code class="hljs" data-trim>
 import { eventChannel, END } from 'redux-saga'
-
 function countdown(secs) {
   return eventChannel(emitter =&gt; {
       const iv = setInterval(() =&gt; {
@@ -280,12 +274,10 @@ function countdown(secs) {
         if (secs &gt; 0) {
           emitter(secs)
         } else {
-          // this causes the channel to close
-          emitter(END)
+          emitter(END) // close
         }
       }, 1000);
-      // The subscriber must return an unsubscribe function
-      return () =&gt; {
+      return () =&gt; { // unsubscribe
         clearInterval(iv)
       }
     }
@@ -302,7 +294,6 @@ export function* saga() {
   const chan = yield call(countdown, value)
   try {
     while (true) {
-      // take(END) will cause the saga to terminate by jumping to the finally block
       let seconds = yield take(chan)
       console.log(`countdown: ${seconds}`)
     }
